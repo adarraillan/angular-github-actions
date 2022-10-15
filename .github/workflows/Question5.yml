@@ -1,0 +1,43 @@
+name: Question5
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    types: [closed]
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      if: github.event.pull_request.merged==true
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      if: github.event.pull_request.merged==true
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      if: github.event.pull_request.merged==true
+      run: npm install
+
+    - name: Run tests
+      if: github.event.pull_request.merged==true
+      run: npm run test:headless
+
+    - name: Build
+      if: github.event.pull_request.merged==true
+      run: npm run build:prod
+
+    - name: Deploy
+      if: github.event.pull_request.merged==true
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: dist/angular-github-actions
+        enable_jekyll: true
